@@ -463,7 +463,7 @@
             highlightBox: true,
             highlightIdentical: true,
             playSound: false,
-            theme: 'dark' // 'dark' or 'light'
+            theme: 'light' // 'dark' or 'light'
         };
 
         // Sudoku Generator & Solver Engine
@@ -651,6 +651,18 @@
                     highlightBox: true,
                     highlightIdentical: true,
                     playSound: true,
+                    theme: 'light'
+                };
+            } else if (mode === 'custom') {
+                settings = {
+                    checkGuesses: true,
+                    countErrors: true,
+                    showTimer: true,
+                    highlightConflicts: true,
+                    highlightRowCol: true,
+                    highlightBox: true,
+                    highlightIdentical: true,
+                    playSound: false,
                     theme: 'light'
                 };
             }
