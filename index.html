@@ -452,9 +452,9 @@
         let timerInterval = null;
         let isGameActive = false;
 
-        const STORAGE_KEY = 'sudoku_player_preferences';
-        const DEFAULT_SETTINGS = {
-            checkGuesses: true,
+        const STORAGE_KEY = 'sudoku_player_custom_settings';
+        const DEFAULT_CUSTOM_SETTINGS = {
+            checkGuesses: false,
             countErrors: true,
             showTimer: true,
             highlightConflicts: true,
@@ -465,29 +465,54 @@
             theme: 'light'
         };
 
-        // Settings State
-        let settingsMode = 'custom';
-        let settings = { ...DEFAULT_SETTINGS };
+        const PRESET_SETTINGS = {
+            dark: {
+                checkGuesses: false,
+                countErrors: true,
+                showTimer: true,
+                highlightConflicts: true,
+                highlightRowCol: true,
+                highlightBox: true,
+                highlightIdentical: true,
+                playSound: false,
+                theme: 'dark'
+            },
+            light: {
+                checkGuesses: false,
+                countErrors: true,
+                showTimer: true,
+                highlightConflicts: true,
+                highlightRowCol: true,
+                highlightBox: true,
+                highlightIdentical: true,
+                playSound: true,
+                theme: 'light'
+            }
+        };
 
-        function getDefaultSettings() {
-            return { ...DEFAULT_SETTINGS };
+        let settingsMode = 'custom';
+        let settings = { ...DEFAULT_CUSTOM_SETTINGS };
+
+        function getDefaultCustomSettings() {
+            return { ...DEFAULT_CUSTOM_SETTINGS };
         }
 
         function loadSettings() {
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (!saved) {
-                    settings = getDefaultSettings();
+                    settings = getDefaultCustomSettings();
                     return;
                 }
+
                 const parsed = JSON.parse(saved);
-                settings = { ...getDefaultSettings(), ...parsed };
+                settings = { ...getDefaultCustomSettings(), ...parsed };
             } catch (error) {
-                settings = getDefaultSettings();
+                settings = getDefaultCustomSettings();
             }
         }
 
-        function persistSettings() {
+        function persistCustomSettings() {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
             } catch (error) {
@@ -660,44 +685,32 @@
             });
 
             if (mode === 'dark') {
-                settings = {
-                    ...settings,
-                    checkGuesses: true,
-                    countErrors: true,
-                    showTimer: true,
-                    highlightConflicts: true,
-                    highlightRowCol: true,
-                    highlightBox: true,
-                    highlightIdentical: true,
-                    playSound: false,
-                    theme: 'dark'
-                };
+                settings = { ...PRESET_SETTINGS.dark };
             } else if (mode === 'light') {
-                settings = {
-                    ...settings,
-                    checkGuesses: true,
-                    countErrors: true,
-                    showTimer: true,
-                    highlightConflicts: true,
-                    highlightRowCol: true,
-                    highlightBox: true,
-                    highlightIdentical: true,
-                    playSound: true,
-                    theme: 'light'
-                };
+                settings = { ...PRESET_SETTINGS.light };
             } else if (mode === 'custom') {
-                settings = { ...getDefaultSettings(), ...settings };
+                settings = { ...getDefaultCustomSettings(), ...loadSavedCustomSettings() };
             }
 
-            persistSettings();
             applyTheme();
             syncSettingsForm();
             renderBoard();
         }
 
+        function loadSavedCustomSettings() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (!saved) return {};
+                return JSON.parse(saved);
+            } catch (error) {
+                return {};
+            }
+        }
+
         function updateCustomSetting(key, val) {
             settingsMode = 'custom';
             setSettingModeUI('custom');
+
             if (key === 'checkGuesses') settings.checkGuesses = val;
             if (key === 'countErrors') settings.countErrors = val;
             if (key === 'showTimer') settings.showTimer = val;
@@ -710,7 +723,8 @@
                 settings.theme = val;
                 applyTheme();
             }
-            persistSettings();
+
+            persistCustomSettings();
             renderBoard();
         }
 
